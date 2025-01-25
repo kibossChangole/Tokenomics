@@ -20,6 +20,22 @@ describe("tokenomics", () => {
       program.programId
     );
 
+
+    const [expectedTokenomicsAccount, tokenomicsBump] = await anchor.web3.PublicKey.findProgramAddress(
+      [Buffer.from("tokenomics_account")],
+      program.programId
+    );
+    
+    const [expectedFeeAccount, feeAccountBump] = await anchor.web3.PublicKey.findProgramAddress(
+      [Buffer.from("fee_account"), expectedTokenomicsAccount.toBuffer()],
+      program.programId
+    );
+    
+    console.log("Expected Tokenomics Account:", expectedTokenomicsAccount.toBase58());
+    console.log("Expected Fee Account:", expectedFeeAccount.toBase58());
+    console.log("Tokenomics Bump:", tokenomicsBump);
+    console.log("Fee Account Bump:", feeAccountBump);
+
     // Define the provider's wallet as the authority
     const authority = program.provider.publicKey;
 
@@ -28,22 +44,25 @@ describe("tokenomics", () => {
 
     if (tokenomicsAccountInfo) {
       console.log("Tokenomics account already exists. Skipping initialization.");
-      return;
     } else {
       console.log("Tokenomics account does not exist. Proceeding with initialization.");
+
+      // Invoke the initialize method
+      const tx = await program.methods
+        .initialize(new anchor.BN(1000)) // Replace with the desired fee_rate
+        .accounts({
+          tokenomicsAccount: tokenomicsAccount, // Use the derived PDA
+          authority: authority,
+          feeAccount: feeAccountPda,
+          systemProgram: anchor.web3.SystemProgram.programId,
+        })
+        .rpc();
+
+      console.log("Your transaction signature", tx);
     }
 
-    // Invoke the initialize method
-    const tx = await program.methods
-      .initialize(new anchor.BN(1000)) // Replace with the desired fee_rate
-      .accounts({
-        tokenomicsAccount: tokenomicsAccount, // Use the derived PDA
-        authority: authority,
-        feeAccount: feeAccountPda,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .rpc();
-
-    console.log("Your transaction signature", tx);
+    // Fetch and log the account data after initialization
+    const accountData = await program.account.tokenomicsAccount.fetch(tokenomicsAccount);
+    console.log("Tokenomics Account Data:", accountData);
   });
 });
