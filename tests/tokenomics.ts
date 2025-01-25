@@ -10,7 +10,9 @@ describe("tokenomics", () => {
 
   it("Is initialized!", async () => {
     // Generate a new keypair for the tokenomics account
- 
+
+
+    // here i am using PDA, program derived address
     const [tokenomicsAccount] = await anchor.web3.PublicKey.findProgramAddress(
       [Buffer.from("tokenomics_account")],
       program.programId
@@ -18,7 +20,10 @@ describe("tokenomics", () => {
     
 
     // Define the fee account (mocked for testing)
-    const feeAccount = anchor.web3.Keypair.generate();
+    const [feeAccountPda] = await anchor.web3.PublicKey.findProgramAddress(
+      [Buffer.from("fee_account"), tokenomicsAccount.toBuffer()], // Use tokenomicsAccount as seed
+      program.programId
+  );
 
     // Define the provider's wallet as the authority
     const authority = program.provider.publicKey;
@@ -31,7 +36,7 @@ describe("tokenomics", () => {
     .accounts({
       tokenomicsAccount: tokenomicsAccount, // Use the derived PDA
       authority: authority,
-      feeAccount: feeAccount.publicKey,
+      feeAccount: feeAccountPda,
       systemProgram: anchor.web3.SystemProgram.programId,
     })
     .rpc();

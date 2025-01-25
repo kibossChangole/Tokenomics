@@ -1,10 +1,11 @@
 use crate::common::*;
 use crate::state::*;
+use anchor_spl::token::TokenAccount; // Import TokenAccount
 
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer = authority, space = 8 + 32 + 32 + 8 + 8 + 8 + 1,  seeds = [b"tokenomics_account"] , bump)] // Add seeds
+    #[account(init, payer = authority,space =406 ,  seeds = [b"tokenomics_account"] , bump)] // Add seeds
     pub tokenomics_account: Account<'info, TokenomicsAccount>,
     #[account(mut)]
     /// CHECK Uses Account Info which is unsafe, switch to TokenAccount later

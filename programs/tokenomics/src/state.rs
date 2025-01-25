@@ -12,6 +12,11 @@ pub struct TokenomicsAccount {
 }
 
 #[account]
+pub struct Testaccount {
+    pub authority: Pubkey,
+}
+
+#[account]
 pub struct StakeAccount {
     pub owner: Pubkey,
     pub staked_amount: u64,
